@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag against app version
+        run: |
+          VERSION="$(plutil -extract CFBundleShortVersionString raw app/Info.plist)"
+          if [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match app version v${VERSION}." >&2
+            exit 1
+          fi
+          test -f "docs/releases/v${VERSION}.md" || { echo "docs/releases/v${VERSION}.md is missing." >&2; exit 1; }
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Tests
+        run: |
+          npm run check
+          npm test
+
+      - name: Build and verify (Apple Silicon)
+        run: |
+          scripts/build-app.sh --arch arm64
+          codesign --verify --deep --strict --verbose=2 build/GOCO.app
+      - name: Build and verify (Intel)
+        run: |
+          scripts/build-app.sh --arch x64
+          codesign --verify --deep --strict --verbose=2 build/GOCO.app
+          ls -l dist
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "dist/GOCO-${VERSION}.zip" "dist/GOCO-${VERSION}.zip.sha256" \
+            "dist/GOCO-${VERSION}-x64.zip" "dist/GOCO-${VERSION}-x64.zip.sha256" \
+            --title "GOCO ${VERSION}" \
+            --notes-file "docs/releases/v${VERSION}.md" \
+            --verify-tag
