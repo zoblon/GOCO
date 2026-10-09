@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/app-icon_gold.png" width="128" alt="GOCO App-Icon"></p>
+
 # GOCO
 
 [![CI](https://github.com/zoblon/GOCO/actions/workflows/ci.yml/badge.svg)](https://github.com/zoblon/GOCO/actions/workflows/ci.yml)
@@ -91,14 +93,29 @@ Server ohne App-Bau starten (Port 3457, anderer Port über `PORT`):
 GOCO_FOREGROUND=1 node src/goco-standalone.js
 ```
 
+### Icon und Social-Preview
+
+Das App-Icon wird aus `assets/app-icon_gold.png` (1024 × 1024) erzeugt. Zum Neuerzeugen von `app/applet.icns` (macOS):
+
+```bash
+mkdir GOCO.iconset
+for s in 16 32 128 256 512; do
+  sips -z $s $s assets/app-icon_gold.png --out GOCO.iconset/icon_${s}x${s}.png
+  sips -z $((s*2)) $((s*2)) assets/app-icon_gold.png --out GOCO.iconset/icon_${s}x${s}@2x.png
+done
+iconutil -c icns GOCO.iconset -o app/applet.icns && rm -r GOCO.iconset
+```
+
+Favicon und Header-Icons der Oberfläche sind als Base64-PNG in `src/goco-standalone.js` eingebettet und müssen separat ersetzt werden. `assets/social-preview.png` (1280 × 640) erzeugt `scripts/make-social-preview.py` (benötigt Pillow); GitHub nimmt es nur als manuellen Upload unter *Settings → Social preview* an.
+
 ## Aufbau
 
 ```
 src/      Server und Web-App (goco-standalone.js), Abgleichslogik (goco-sync-core.js),
           MOCO-Adapter und Buchungsjournal (goco-sync-server.js), Browser-Workflow (goco-workflow.js)
 app/      AppleScript-Starter, Info.plist, App-Icon (.icns)
-assets/   Icon-Vorlagen
-scripts/  build-app.sh
+assets/   Icon-Vorlagen, Social-Preview
+scripts/  build-app.sh, make-social-preview.py
 test/     node:test-Tests
 docs/     Anleitung (Deutsch), Release-Notes
 ```

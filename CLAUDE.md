@@ -9,6 +9,7 @@ GOCO transfers Google Calendar entries (secret iCal address) to MOCO time tracki
 - `src/goco-sync-server.js` – MOCO adapter, bulk booking, per-day lock, operation journal.
 - `src/goco-workflow.js` – browser-side daily workflow; loaded after `APP_HTML`'s script and overrides some of its functions.
 - `app/` – `main.applescript` (launcher), `Info.plist` (bundle id, version, build), `applet.icns`.
+- `assets/` – icon artwork and `social-preview.png` (made by `scripts/make-social-preview.py`; uploaded by hand in the GitHub settings). Regenerating `app/applet.icns` is described in README.md.
 - `scripts/build-app.sh` – builds `build/GOCO.app` and `dist/GOCO-<version>[-x64].zip`. No Node binary is stored in git.
 - `test/` – `node:test` suites. `docs/releases/v<version>.md` – release notes used by the release workflow.
 
