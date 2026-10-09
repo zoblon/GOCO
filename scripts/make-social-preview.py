@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Renders the GitHub social preview (1280x640 PNG) from assets/app-icon_gold.png.
+"""Renders the GitHub social preview (1280x640 PNG) from app-icon_gold.png
+(looked up in assets/ first, then in the repository root).
 
 Usage: scripts/make-social-preview.py [OUTPUT] [--title GOCO] [--subtitle TEXT] [--note TEXT]
 Requires Pillow (pip install pillow) and the macOS system font Avenir Next.
@@ -51,7 +52,8 @@ def main():
     d = ImageDraw.Draw(img)
 
     icon_size = 330 * SCALE
-    icon = Image.open(ROOT / "assets" / "app-icon_gold.png").convert("RGB").resize((icon_size, icon_size), Image.LANCZOS)
+    icon_path = next(c for c in (ROOT / "assets" / "app-icon_gold.png", ROOT / "app-icon_gold.png") if c.exists())
+    icon = Image.open(icon_path).convert("RGB").resize((icon_size, icon_size), Image.LANCZOS)
     mask = Image.new("L", (icon_size, icon_size), 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, icon_size - 1, icon_size - 1), radius=int(icon_size * 0.225), fill=255)
     x_icon, y_icon = 100 * SCALE, (H - icon_size) // 2
